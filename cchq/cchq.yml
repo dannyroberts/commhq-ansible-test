@@ -1,0 +1,18 @@
+# - name: Common tasks
+#   hosts: all
+#
+#   roles:
+#     - common
+
+# - name: Install / configure app server
+#   hosts: appservers
+#
+#   roles:
+#     - app
+
+- name: Install / configure DB server
+  hosts: dbservers
+  remote_user: root
+
+  roles:
+    - db

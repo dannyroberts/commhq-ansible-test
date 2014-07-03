@@ -1,0 +1,73 @@
+# CouchDB
+- name: Install prequisites
+  apt: name="{{item}}" state=present update_cache=yes
+  with_items:
+    - build-essential
+    - g++
+    - erlang-base
+    - erlang-dev
+    - erlang-eunit
+    - erlang-nox
+    - libmozjs185-dev
+    - libicu-dev
+    - libcurl4-gnutls-dev
+    - libtool
+    - curl
+
+- name: Check CouchDB existence
+  stat: path=/usr/local/bin/couchdb
+  register: couchdb_path
+
+- name: Download CouchDB source
+  get_url: url=http://mirrors.ibiblio.org/apache/couchdb/source/1.3.1/apache-couchdb-1.3.1.tar.gz dest=~/apache-couchdb-1.3.1.tar.gz
+  when: not couchdb_path.stat.exists
+
+- name: Compile + install CouchDB
+  shell: "{{item}}"
+  with_items:
+    - tar xvf ~/apache-couchdb-1.3.1.tar.gz
+    - cd apache-couchdb-1.3.1 && ./configure
+    - make -C ~/apache-couchdb-1.3.1
+    - make install -C ~/apache-couchdb-1.3.1
+    - rm -rf ~/apache-couchdb-1.3.1*
+  when: not couchdb_path.stat.exists
+
+- name: Add CouchDB user
+  user: name=couchdb createhome=no password=no state=present
+
+- name: CouchDB ownership permissions
+  file: path=/usr/local/var/log/couchdb owner=couchdb group=couchdb recurse=yes
+  file: path=/usr/local/var/lib/couchdb owner=couchdb group=couchdb recurse=yes
+  file: path=/usr/local/var/run/couchdb owner=couchdb group=couchdb recurse=yes
+
+- name: Configure CouchDB as service
+  file: src=/usr/local/etc/init.d/couchdb dest=/etc/init.d/couchdb state=link
+- shell: update-rc.d couchdb defaults
+
+- name: Start CouchDB service
+  service: name=couchdb state=started
+
+- name: Add CouchDB databases
+  shell: "{{item}}"
+  with_items:
+    - curl -X PUT "http://localhost:5984/{{couchdb_db}}"
+    - curl -X PUT "http://localhost:5984/_config/admins/{{couchdb_user}}" -d \"{{couchdb_pw}}\"
+
+# PostgreSQL
+- name: Install PostgreSQL & dependencies
+  apt: name={{item}} state=present
+  with_items:
+    - postgresql
+    - libpq-dev
+    - python-psycopg2
+
+- name: Create PostgreSQL databases
+  sudo: yes
+  sudo_user: postgres
+  postgresql_db: name={{postgres_db}} state=present
+  postgresql_db: name={{postgres_reporting_db}} state=present
+
+- name: Create PostgreSQL users
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user: name={{postgres_user}} password={{postgres_pw}} role_attr_flags=CREATEDB state=present
