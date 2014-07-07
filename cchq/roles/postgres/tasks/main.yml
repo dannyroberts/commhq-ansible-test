@@ -1,0 +1,18 @@
+# PostgreSQL
+- name: Install PostgreSQL & dependencies
+  apt: name={{item}} state=present
+  with_items:
+    - postgresql
+    - libpq-dev
+    - python-psycopg2
+
+- name: Create PostgreSQL databases
+  sudo: yes
+  sudo_user: postgres
+  postgresql_db: name={{postgres_db}} state=present
+  postgresql_db: name={{postgres_reporting_db}} state=present
+
+- name: Create PostgreSQL users
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user: name={{postgres_user}} password={{postgres_pw}} role_attr_flags=CREATEDB state=present

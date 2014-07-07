@@ -1,0 +1,40 @@
+- name: Add PPA repos
+  apt_repository: repo='ppa:chris-lea/node.js'
+
+- name: Install packages
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - git
+    - python-pip
+    - nodejs
+    # Complilation
+    - build-essential
+    - libpq-dev
+    - python-dev
+    - libxml2-dev
+    - libxslt-dev 
+
+- name: Install pip bottles
+  pip: name=virtualenv
+- pip: name=virtualenvwrapper
+- pip: name=supervisor version=3.0a10
+
+- name: Configure supervisor
+  sudo: yes
+  shell: "{{item}}"
+  with_items:
+    - echo_supervisord_conf | tee /etc/supervisord.conf
+    - curl -L https://gist.github.com/raw/1213031/929e578faae2ad3bcb29b03d116bcb09e1932221/supervisord.conf | tee /etc/init/supervisord.conf
+
+- name: Start supervisor daemon
+  service: name=supervisord state=started
+
+- name: Configure virtualenv
+  file: path=~/.virtualenvs state=directory
+- shell: virtualenv ~/.virtualenvs/commcare-hq --no-site-packages
+
+- name: Checkout commcare-hq code
+  git: repo=https://github.com/dimagi/commcare-hq.git dest=~/commcare-hq recursive=yes
+
+- name: Update dependencies
+  pip: chdir=/root/commcare-hq requirements=requirements/requirements.txt virtualenv=~/.virtualenvs/commcare-hq extra_args='--download-cache pip_cache --allow-unverified egenix-mx-base'

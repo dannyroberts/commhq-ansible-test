@@ -1,18 +1,24 @@
-# - name: Common tasks
-#   hosts: all
-#
-#   roles:
-#     - common
+- name: Common tasks
+  hosts: all
+  remote_user: root
 
-# - name: Install / configure app server
-#   hosts: appservers
-#
-#   roles:
-#     - app
+  roles:
+    - common
 
-- name: Install / configure DB server
+- name: Install / configure app server
+  hosts: appservers
+  remote_user: root
+
+  roles:
+    - app
+
+- name: Deploy CouchDB servers
   hosts: dbservers
   remote_user: root
 
   roles:
-    - db
+    - couchdb
+
+- name: Deploy PostgreSQL servers
+  hosts: dbservers
+  remote_user: root

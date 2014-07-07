@@ -2,3 +2,4 @@
 provisioning/id_rsa.pub
 .vagrant
 ansible-tower-setup-1.4.11
+*.swp

@@ -12,7 +12,6 @@
     - libicu-dev
     - libcurl4-gnutls-dev
     - libtool
-    - curl
 
 - name: Check CouchDB existence
   stat: path=/usr/local/bin/couchdb
@@ -36,9 +35,11 @@
   user: name=couchdb createhome=no password=no state=present
 
 - name: CouchDB ownership permissions
-  file: path=/usr/local/var/log/couchdb owner=couchdb group=couchdb recurse=yes
-  file: path=/usr/local/var/lib/couchdb owner=couchdb group=couchdb recurse=yes
-  file: path=/usr/local/var/run/couchdb owner=couchdb group=couchdb recurse=yes
+  file: path={{item}} owner=couchdb group=couchdb recurse=yes state=directory
+  with_items:
+    - /usr/local/var/log/couchdb
+    - /usr/local/var/lib/couchdb
+    - /usr/local/var/run/couchdb
 
 - name: Configure CouchDB as service
   file: src=/usr/local/etc/init.d/couchdb dest=/etc/init.d/couchdb state=link
@@ -52,22 +53,3 @@
   with_items:
     - curl -X PUT "http://localhost:5984/{{couchdb_db}}"
     - curl -X PUT "http://localhost:5984/_config/admins/{{couchdb_user}}" -d \"{{couchdb_pw}}\"
-
-# PostgreSQL
-- name: Install PostgreSQL & dependencies
-  apt: name={{item}} state=present
-  with_items:
-    - postgresql
-    - libpq-dev
-    - python-psycopg2
-
-- name: Create PostgreSQL databases
-  sudo: yes
-  sudo_user: postgres
-  postgresql_db: name={{postgres_db}} state=present
-  postgresql_db: name={{postgres_reporting_db}} state=present
-
-- name: Create PostgreSQL users
-  sudo: yes
-  sudo_user: postgres
-  postgresql_user: name={{postgres_user}} password={{postgres_pw}} role_attr_flags=CREATEDB state=present

@@ -1,6 +1,3 @@
-couchdb_db: "commcarehq"
-couchdb_user: "commcarehq"
-couchdb_pw: "commcarehq"
 postgres_db: "commcarehq"
 postgres_reporting_db: "commcarehq_reporting"
 postgres_user: "commcarehq"
