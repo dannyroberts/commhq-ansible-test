@@ -22,3 +22,6 @@
 - name: Deploy PostgreSQL servers
   hosts: dbservers
   remote_user: root
+
+  roles:
+    - postgres

@@ -9,10 +9,19 @@
 - name: Create PostgreSQL databases
   sudo: yes
   sudo_user: postgres
-  postgresql_db: name={{postgres_db}} state=present
-  postgresql_db: name={{postgres_reporting_db}} state=present
+  postgresql_db: name={{item}} state=present
+  with_items:
+    - "{{postgres_db}}"
+    - "{{postgres_reporting_db}}"
 
 - name: Create PostgreSQL users
   sudo: yes
   sudo_user: postgres
   postgresql_user: name={{postgres_user}} password={{postgres_pw}} role_attr_flags=CREATEDB state=present
+
+- name: Apply PostgreSQL config
+  template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.1/main/pg_hba.conf
+- template: src=postgresql.conf.j2 dest=/etc/postgresql/9.1/main/postgresql.conf
+
+- name: Restart PostgreSQL service
+  service: name=postgresql state=restarted

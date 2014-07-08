@@ -14,7 +14,7 @@
     - libxml2-dev
     - libxslt-dev 
 
-- name: Install pip bottles
+- name: Install pip packages
   pip: name=virtualenv
 - pip: name=virtualenvwrapper
 - pip: name=supervisor version=3.0a10
@@ -37,4 +37,7 @@
   git: repo=https://github.com/dimagi/commcare-hq.git dest=~/commcare-hq recursive=yes
 
 - name: Update dependencies
-  pip: chdir=/root/commcare-hq requirements=requirements/requirements.txt virtualenv=~/.virtualenvs/commcare-hq extra_args='--download-cache pip_cache --allow-unverified egenix-mx-base'
+  pip: requirements=~/commcare-hq/requirements/requirements.txt virtualenv=~/.virtualenvs/commcare-hq extra_args='--download-cache pip_cache --allow-unverified egenix-mx-base'
+
+- name: Upload config template
+  template: src=localsettings.py.j2 dest=~/commcare-hq/localsettings.py
