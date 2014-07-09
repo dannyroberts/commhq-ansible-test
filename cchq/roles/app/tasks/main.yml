@@ -67,4 +67,4 @@
   shell: screen -dmS commcare-hq ~/.virtualenvs/commcare-hq/bin/python manage.py runserver 0.0.0.0:8000
   args:
     chdir: ~/commcare-hq
-  when: process_count.stdout == "1"
+  when: process_count.stdout.find('1') != -1
