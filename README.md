@@ -25,4 +25,6 @@ cd /vagrant/cchq
 ansible-playbook -i hosts cchq.yml
 ```
 
-Watch deployment!
+Watch deployment! When finished, visit:
+
+http://192.168.33.11:8000/

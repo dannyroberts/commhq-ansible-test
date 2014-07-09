@@ -7,6 +7,7 @@
     - git
     - python-pip
     - nodejs
+    - screen
     # Complilation
     - build-essential
     - libpq-dev
@@ -29,9 +30,16 @@
 - name: Start supervisor daemon
   service: name=supervisord state=started
 
+- name: Check virtualenv existence
+  stat: path=~/.virtualenvs/commcare-hq
+  register: virtualenv_path
+
 - name: Configure virtualenv
   file: path=~/.virtualenvs state=directory
+  when: not virtualenv_path.stat.exists
+
 - shell: virtualenv ~/.virtualenvs/commcare-hq --no-site-packages
+  when: not virtualenv_path.stat.exists
 
 - name: Checkout commcare-hq code
   git: repo=https://github.com/dimagi/commcare-hq.git dest=~/commcare-hq recursive=yes
@@ -41,3 +49,22 @@
 
 - name: Upload config template
   template: src=localsettings.py.j2 dest=~/commcare-hq/localsettings.py
+
+- name: Database migrations
+  shell: "{{item}}"
+  with_items:
+    - ~/.virtualenvs/commcare-hq/bin/python manage.py syncdb --noinput
+    - ~/.virtualenvs/commcare-hq/bin/python manage.py migrate --noinput
+    - ~/.virtualenvs/commcare-hq/bin/python manage.py collectstatic --noinput
+  args:
+    chdir: ~/commcare-hq
+
+- name: Check if server is running
+  shell: ps ax | grep runserver | wc -l
+  register: process_count
+
+- name: Start server
+  shell: screen -dmS commcare-hq ~/.virtualenvs/commcare-hq/bin/python manage.py runserver 0.0.0.0:8000
+  args:
+    chdir: ~/commcare-hq
+  when: process_count.stdout == "1"

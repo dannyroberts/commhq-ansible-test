@@ -5,13 +5,6 @@
   roles:
     - common
 
-- name: Install / configure app server
-  hosts: appservers
-  remote_user: root
-
-  roles:
-    - app
-
 - name: Deploy CouchDB servers
   hosts: dbservers
   remote_user: root
@@ -25,3 +18,10 @@
 
   roles:
     - postgres
+
+- name: Install / configure app server
+  hosts: appservers
+  remote_user: root
+
+  roles:
+    - app

@@ -56,4 +56,4 @@
   shell: "{{item}}"
   with_items:
     - curl -X PUT "http://localhost:5984/{{couchdb_db}}"
-    - curl -X PUT "http://localhost:5984/_config/admins/{{couchdb_user}} -d \"{{couchdb_pw}}\""
+    - curl -X PUT "http://localhost:5984/_config/admins/{{couchdb_user}}" -d \"'{{couchdb_pw}}'\"
