@@ -4,3 +4,5 @@
     - curl
     - vim
     - htop
+    # especially important on celery machine
+    - tmpreaper
